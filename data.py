@@ -36,8 +36,6 @@ def data(dia, mes, ano):
         anos_diferenca = dias_diferenca // 365.25
 
         return jsonify({'situacao': situacao,
-                        "data_inserida": temporecebido,
-                        "data_atual": data_composta,
                         "dias de diferenca": dias_diferenca,
                         "meses de diferenca": meses_diferenca,
                         "anos de diferenca": anos_diferenca})
