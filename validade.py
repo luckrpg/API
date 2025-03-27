@@ -1,43 +1,41 @@
-from flask import Flask, jsonify
-from flask_pydantic_spec import FlaskPydanticSpec
-from datetime import date
-from dateutil.relativedelta import relativedelta
+from flask import Flask, jsonify, render_template
 
+from flask_pydantic_spec import FlaskPydanticSpec
+import datetime
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 app = Flask(__name__)
 
-spec = FlaskPydanticSpec('Flask',
-                         title='Flask API',
+
+spec = FlaskPydanticSpec('flask',
+                         title='First API - SENAI',
                          version='1.0.0')
 spec.register(app)
 
-@app.route('/<quantidade>/<tipo>')
-def validade(quanti, tip):
 
+@app.route('/valid')
+def validado(ano, mes, dia):
     try:
-        data_atual_do_produto = date.today()
-        quanti = int(quanti)
-        que_pode_mudar = data_atual_do_produto
+        prazo = 12
 
-        if tip in ['ano', 'anos', 'year', 'years']:
+        cadastro = datetime(int(ano)), int(mes), int(dia).date()
 
-            que_pode_mudar = data_atual_do_produto + relativedelta(years=quanti)
-        elif tip in ['mes', 'meses', 'month', 'months']:
+        meses = cadastro.today() + relativedelta(months=prazo)
 
-            que_pode_mudar = data_atual_do_produto + relativedelta(months=quanti)
-        elif tip in ['dia', 'dias', 'day', 'days']:
+        anos = cadastro.today() + relativedelta(years=prazo)
 
-            que_pode_mudar = data_atual_do_produto + relativedelta(days=quanti)
-        else:
-            return jsonify({'erro': 'isso não funcionou lol kkkkkkkkk'}), 400
+        semanas = cadastro.today() + relativedelta(week=prazo)
 
-        return jsonify({'data de validade é essa ai ->': que_pode_mudar.strftime('%d/%m/%Y')})
+        dias = cadastro.today() + relativedelta(days=prazo)
 
-
-    except ValueError:
-        return jsonify({'deu n =(': "error"}, 400)
-    except TypeError:
-        return jsonify({'deu n =(': "error"}, 400)
+        return jsonify({(f'"antes" - {abs(datetime.today().strftime("%d-%m-%Y"))}, '
+                         f"cadastro - {cadastro}
+                         f'"dias"- {dias}, '
+                         f'"semanas"- {semanas}, '
+                         f'"meses"- {meses},'
+                         f'"anos"- {anos}')}
+                       )
 
 
 if __name__ == '__main__':
