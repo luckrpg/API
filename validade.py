@@ -11,7 +11,7 @@ spec = FlaskPydanticSpec('flask',
 spec.register(app)
 
 
-@app.route('/valid/<tipo>/<valor>', methods=['GET', 'POST'])
+@app.route('/valid-<tipo>-<valor>', methods=['GET', 'POST'])
 def verificar(tipo=None, valor=None):
     if tipo is None and valor is None:
         return jsonify({"error": "insira valores"

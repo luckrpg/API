@@ -1,4 +1,5 @@
 from flask import Flask
+
 app = Flask(__name__)
 
 
@@ -43,6 +44,10 @@ def par(num1):
             return f' numero {num1} impar'
     except ValueError:
         return jsonify({'erro': 'Formato incorreto'})
+
+
+
+
 
 
 # esse if aqui em baixo não pode sair deste local tem que ser o último
