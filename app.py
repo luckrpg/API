@@ -1,115 +1,101 @@
 from flask import Flask, jsonify, request
-from flask_openapi_spec import FlaskApiSpec
-from flask_openapi_spec import Response, Request
-from marshmallow import Schema, fields
-from typing import List
+from models import Cliente, Veiculo, OrdemServico, clientes, veiculos, ordens_de_servico
 
 app = Flask(__name__)
 
 
-# Modelos para validação de dados
-class Cliente(Schema):
-    id = fields.Int(dump_only=True)  # Somente leitura
-    nome = fields.Str(required=True)
-    email = fields.Email(required=True)
+# Funções de validação manual
+def validar_cliente(dados):
+    erros = {}
+    if not isinstance(dados.get("nome"), str) or not dados["nome"]:
+        erros["nome"] = "Nome é obrigatório e deve ser uma string."
+    if not isinstance(dados.get("email"), str) or "@" not in dados["email"]:
+        erros["email"] = "Email é obrigatório e deve ser válido."
+    return erros
 
 
-class Veiculo(Schema):
-    id = fields.Int(dump_only=True)
-    cliente_id = fields.Int(required=True)
-    modelo = fields.Str(required=True)
-    ano = fields.Int(required=True)
+def validar_veiculo(dados):
+    erros = {}
+    if not isinstance(dados.get("cliente_id"), int):
+        erros["cliente_id"] = "cliente_id é obrigatório e deve ser um inteiro."
+    if not isinstance(dados.get("modelo"), str) or not dados["modelo"]:
+        erros["modelo"] = "Modelo é obrigatório e deve ser uma string."
+    if not isinstance(dados.get("ano"), int):
+        erros["ano"] = "Ano é obrigatório e deve ser um inteiro."
+    return erros
 
 
-class OrdemServico(Schema):
-    id = fields.Int(dump_only=True)
-    veiculo_id = fields.Int(required=True)
-    descricao = fields.Str(required=True)
-    status = fields.Str(required=True)
+def validar_ordem_servico(dados):
+    erros = {}
+    if not isinstance(dados.get("veiculo_id"), int):
+        erros["veiculo_id"] = "veiculo_id é obrigatório e deve ser um inteiro."
+    if not isinstance(dados.get("descricao"), str) or not dados["descricao"]:
+        erros["descricao"] = "Descrição é obrigatória e deve ser uma string."
+    if not isinstance(dados.get("status"), str) or not dados["status"]:
+        erros["status"] = "Status é obrigatório e deve ser uma string."
+    return erros
 
 
-# Dados em memória (simulação de um banco de dados)
-clientes = []
-veiculos = []
-ordens_de_servico = []
-
-# Configuração da documentação
-app.config.update({
-    'APISPEC_SPEC': 'Flask',
-    'APISPEC_SWAGGER_UI_URL': '/docs/',  # URL para acessar a documentação
-    'APISPEC_SWAGGER_UI_VERSION': '3.25.0',
-})
-
-spec = FlaskApiSpec(app)  # Instância do FlaskApiSpec
-
-
+# Rotas
 @app.route('/')
 def hello_world():
-    return 'Hello, World!'
+    return "Hello, World!"
 
 
-@app.route('/clientes', methods=['GET'])
-@spec.validate(resp=Response(HTTP_200=List[Cliente]), tags=["Clientes"])
+# Endpoints de Clientes
+@app.route('/listar_clientes', methods=['GET'])
 def listar_clientes():
+    return jsonify([vars(c) for c in clientes])
 
-    return jsonify(clientes)
 
-
-@app.route('/clientes', methods=['POST'])
-@spec.validate(body=Request(Cliente), resp=Response(HTTP_201=Cliente), tags=["Clientes"])
+@app.route('/cria_clientes', methods=['POST'])
 def criar_cliente():
+    dados = request.json
+    erros = validar_cliente(dados)
+    if erros:
+        return jsonify({"erro": erros}), 400
 
-    body = request.json
-    novo_cliente = body
-    novo_cliente['id'] = len(clientes) + 1  # Gerar ID simples
-    clientes.append(novo_cliente)
-    return jsonify(novo_cliente), 201
+    cliente = Cliente(nome=dados["nome"], email=dados["email"])
+    clientes.append(cliente)
+    return jsonify(vars(cliente)), 201
 
 
-@app.route('/veiculos', methods=['GET'])
-@spec.validate(resp=Response(HTTP_200=List[Veiculo]), tags=["Veículos"])
+# Endpoints de Veículos
+@app.route('/lista_veiculos', methods=['GET'])
 def listar_veiculos():
+    return jsonify([vars(v) for v in veiculos])
 
-    return jsonify(veiculos)
 
-
-@app.route('/veiculos', methods=['POST'])
-@spec.validate(body=Request(Veiculo), resp=Response(HTTP_201=Veiculo), tags=["Veículos"])
+@app.route('/cria_veiculo', methods=['POST'])
 def criar_veiculo():
+    dados = request.json
+    erros = validar_veiculo(dados)
+    if erros:
+        return jsonify({"erro": erros}), 400
 
-    body = request.json
-    novo_veiculo = body
-    novo_veiculo['id'] = len(veiculos) + 1
-    veiculos.append(novo_veiculo)
-    return jsonify(novo_veiculo), 201
+    veiculo = Veiculo(cliente_id=dados["cliente_id"], modelo=dados["modelo"], ano=dados["ano"])
+    veiculos.append(veiculo)
+    return jsonify(vars(veiculo)), 201
 
 
-@app.route('/os', methods=['GET'])
-@spec.validate(resp=Response(HTTP_200=List[OrdemServico]), tags=["Ordens de Serviço"])
+# Endpoints de Ordens de Serviço
+@app.route('/lista_servisos', methods=['GET'])
 def listar_ordens_de_servico():
+    return jsonify([vars(s) for s in ordens_de_servico])
 
-    return jsonify(ordens_de_servico)
 
-
-@app.route('/os', methods=['POST'])
-@spec.validate(body=Request(OrdemServico), resp=Response(HTTP_201=OrdemServico), tags=["Ordens de Serviço"])
+@app.route('/cria_servos', methods=['POST'])
 def criar_ordem_servico():
+    dados = request.json
+    erros = validar_ordem_servico(dados)
+    if erros:
+        return jsonify({"erro": erros}), 400
 
-    body = request.json
-    nova_os = body
-    nova_os['id'] = len(ordens_de_servico) + 1  # Gerar ID simples
-    ordens_de_servico.append(nova_os)
-    return jsonify(nova_os), 201
+    ordem_servico = OrdemServico(veiculo_id=dados["veiculo_id"], descricao=dados["descricao"], status=dados["status"])
+    ordens_de_servico.append(ordem_servico)
+    return jsonify(vars(ordem_servico)), 201
 
 
-# Associando as rotas à documentação
-spec.register(listar_clientes)
-spec.register(criar_cliente)
-spec.register(listar_veiculos)
-spec.register(criar_veiculo)
-spec.register(listar_ordens_de_servico)
-spec.register(criar_ordem_servico)
-
-# Esse if deve ser mantido no final
+# Main
 if __name__ == '__main__':
     app.run(debug=True)
