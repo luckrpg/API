@@ -12,10 +12,10 @@ spec = FlaskPydanticSpec(
 spec.register(app)
 init_db()
 
-
-
 @app.route('/clientes', methods=['GET'])
 def listar_clientes():
+
+
     try:
         clientes = select(Cliente)
         result = db_session().execute(clientes).scalars().all()
@@ -40,6 +40,9 @@ def criar_cliente():
     return jsonify(cliente.serialize()), 201
 
 
+
+
+
 @app.route('/clientes/<int:id>', methods=['PUT'])
 def atualizar_cliente(id):
     cliente = db_session.execute(select(Cliente).where(Cliente.id == id)).scalar()
@@ -52,6 +55,9 @@ def atualizar_cliente(id):
     return jsonify(cliente.serialize())
 
 
+
+
+
 @app.route('/clientes/<int:id>', methods=['DELETE'])
 def deletar_cliente(id):
     cliente = db_session.execute(select(Cliente).where(Cliente.id == id)).scalar()
@@ -60,9 +66,15 @@ def deletar_cliente(id):
 
 
 
+
+
+
 @app.route('/veiculos', methods=['GET'])
 def listar_veiculos():
     return jsonify([v.serialize() for v in Veiculo.query.all()])
+
+
+
 
 
 @app.route('/veiculos', methods=['POST'])
@@ -80,11 +92,16 @@ def criar_veiculo():
     return jsonify(veiculo.serialize()), 201
 
 
+
+
 @app.route('/veiculos/<int:id>', methods=['GET'])
 def buscar_veiculo(id):
 
     veiculo = Veiculo.query.get_or_404(id)
     return jsonify(veiculo.serialize())
+
+
+
 
 
 @app.route('/veiculos/<int:id>', methods=['PUT'])
@@ -100,6 +117,9 @@ def atualizar_veiculo(id):
     return jsonify(veiculo.serialize())
 
 
+
+
+
 @app.route('/veiculos/<int:id>', methods=['DELETE'])
 def deletar_veiculo(id):
 
@@ -108,11 +128,16 @@ def deletar_veiculo(id):
     return jsonify({'messagem': 'Veículo deletado com sucesso!'})
 
 
-# ORDENS DE SERVIÇO
+
+
+
 @app.route('/ordens', methods=['GET'])
 def listar_ordens():
 
     return jsonify([o.serialize() for o in OrdemServico.query.all()])
+
+
+
 
 
 @app.route('/ordens', methods=['GET'])
@@ -130,15 +155,18 @@ def criar_ordens():
     return jsonify(ordens.serialize()), 201
 
 
+
+
+
+
 @app.route('/ordens/<int:id>', methods=['GET'])
 def buscar_ordens(id):
-    """
-    Api para buscar ordens
-    :param id:
-    :return:
-    """
+
     ordem = OrdemServico.query.get_or_404(id)
     return jsonify(ordem.serialize())
+
+
+
 
 
 @app.route('/ordens/<int:id>', methods=['PUT'])
