@@ -7,6 +7,7 @@ db_session = scoped_session(sessionmaker(bind=engine))
 Base = declarative_base()
 Base.query = db_session.query_property()
 
+
 class Cliente(Base):
     __tablename__ = 'cliente'
     id = Column(Integer, primary_key=True)
@@ -15,6 +16,8 @@ class Cliente(Base):
     telefone = Column(String, nullable=False)
     endereco = Column(String, nullable=False)
 
+
+
     def __repr__(self):
         return (f'<Cliente(\n id={self.id}, '
                 f'\n nome={self.nome},'
@@ -22,13 +25,19 @@ class Cliente(Base):
                 f'\n telefone={self.telefone},'
                 f'\n endereco={self.endereco})>')
 
+
+
     def save(self):
         db_session.add(self)
         db_session.commit()
 
+
+
     def delete(self):
         db_session.delete(self)
         db_session.commit()
+
+
 
     def serialize(self):
         return {
@@ -38,6 +47,9 @@ class Cliente(Base):
             'telefone': self.telefone,
             'endereco': self.endereco
         }
+
+
+
 
 class Veiculo(Base):
     __tablename__ = 'veiculo'
@@ -49,6 +61,8 @@ class Veiculo(Base):
     ano_fabricacao = Column(Integer, nullable=False)
     cliente = relationship('Cliente')
 
+
+
     def __repr__(self):
         return (f'<Veiculo(id={self.id},'
                 f' modelo={self.modelo},'
@@ -56,13 +70,19 @@ class Veiculo(Base):
                 f' ano_fabricacao={self.ano_fabricacao}'
                 f' cliente={self.cliente})>')
 
+
+
     def save(self):
         db_session.add(self)
         db_session.commit()
 
+
+
     def delete(self):
         db_session.delete(self)
         db_session.commit()
+
+
 
     def serialize(self):
         return {
@@ -75,6 +95,8 @@ class Veiculo(Base):
         }
 
 
+
+
 class OrdemServico(Base):
     __tablename__ = 'ordem_servico'
     id = Column(Integer, primary_key=True)
@@ -85,6 +107,8 @@ class OrdemServico(Base):
     valor_estimado = Column(Float, nullable=False)
     veiculo = relationship('Veiculo')
 
+
+
     def __repr__(self):
         return (f'<OrdemServico(id={self.id}, '
                 f'status={self.status},'
@@ -94,13 +118,19 @@ class OrdemServico(Base):
                 f'valor_estimado={self.valor_estimado},'
                 f'veiculo={self.veiculo})>')
 
+
+
     def save(self):
         db_session.add(self)
         db_session.commit()
 
+
+
     def delete(self):
         db_session.delete(self)
         db_session.commit()
+
+
 
     def serialize(self):
         return {
@@ -112,6 +142,8 @@ class OrdemServico(Base):
             'valor_estimado': self.valor_estimado,
             'veiculo': self.veiculo
         }
+
+
 
 def init_db():
     Base.metadata.create_all(engine)
