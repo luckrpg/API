@@ -14,21 +14,18 @@ init_db()
 
 @app.route('/clientes', methods=['GET'])
 def listar_clientes():
-
-
     try:
-        clientes = select(Cliente)
-        result = db_session().execute(clientes).scalars().all()
-        listar_clientes = []
-        for cliente in result:
-            listar_clientes.append({cliente.serialize()})
-            return jsonify({'clientes': listar_clientes})
-    except ValueError as e:
-        return jsonify({'error': str(e)})
+        clientes = db_session.execute(select(Cliente)).scalars().all()
 
+        listar_cliente = []
+        for cliente in clientes:
+            listar_cliente.append(cliente.serialize())
+        return jsonify({'clientes': listar_cliente})
 
-@app.route('/criar_cliente', methods=['POST'])
-def criar_cliente():
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+@app.route('/cria_cliente', methods=['POST'])
+def cria_cliente():
     data = request.get_json()
     cliente = Cliente(
         nome=data['nome'],
@@ -40,47 +37,33 @@ def criar_cliente():
     return jsonify(cliente.serialize()), 201
 
 
+@app.route('/clientes/atualiza', methods=['PUT'])
+def atualiza_cliente(id):
 
+    cliente = db_session.execute(select(Cliente).where(Cliente.id == id)).scalar_one_or_none()
+    if not cliente:
+        return jsonify({'message': 'Cliente não encontrado'}), 404
 
-
-@app.route('/clientes/<int:id>', methods=['PUT'])
-def atualizar_cliente(id):
-    cliente = db_session.execute(select(Cliente).where(Cliente.id == id)).scalar()
     data = request.get_json()
-    cliente.nome = data('nome')
-    cliente.cpf = data('cpf', cliente.cpf)
-    cliente.telefone = data('telefone', cliente.telefone)
-    cliente.endereco = data('endereco', cliente.endereco)
+    cliente.nome = data.get('nome', cliente.nome)
+    cliente.cpf = data.get('cpf', cliente.cpf)
+    cliente.telefone = data.get('telefone', cliente.telefone)
+    cliente.endereco = data.get('endereco', cliente.endereco)
     cliente.save()
     return jsonify(cliente.serialize())
 
 
 
-
-
-@app.route('/clientes/<int:id>', methods=['DELETE'])
-def deletar_cliente(id):
-    cliente = db_session.execute(select(Cliente).where(Cliente.id == id)).scalar()
-    cliente.delete()
-    return jsonify({'message': 'Cliente deletado'})
-
-
-
-
-
-
 @app.route('/veiculos', methods=['GET'])
 def listar_veiculos():
-    return jsonify([v.serialize() for v in Veiculo.query.all()])
-
-
+    veiculos = db_session.execute(select(Veiculo)).scalars().all()
+    return jsonify([v.serialize() for v in veiculos])
 
 
 
 @app.route('/veiculos', methods=['POST'])
-def criar_veiculo():
-
-    data = request.json()
+def cria_veiculo():
+    data = request.json
     veiculo = Veiculo(
         cliente_id=data['cliente_id'],
         marca=data['marca'],
@@ -93,103 +76,73 @@ def criar_veiculo():
 
 
 
-
 @app.route('/veiculos/<int:id>', methods=['GET'])
-def buscar_veiculo(id):
-
-    veiculo = Veiculo.query.get_or_404(id)
+def busca_veiculo(id):
+    veiculo = db_session.execute(select(Veiculo).where(Veiculo.id == id)).scalar_one_or_none()
+    if not veiculo:
+        return jsonify({'message': 'Veículo não encontrado'}), 404
     return jsonify(veiculo.serialize())
 
 
-
-
-
 @app.route('/veiculos/<int:id>', methods=['PUT'])
-def atualizar_veiculo(id):
+def atualiza_veiculo(id):
+    veiculo = db_session.execute(select(Veiculo).where(Veiculo.id == id)).scalar_one_or_none()
+    if not veiculo:
+        return jsonify({'message': 'Veículo não encontrado'}), 404
 
-    veiculo = Veiculo.query.get_or_404(id)
-    data = request.json()
-    veiculo.cliente_id = data.get['cliente_id'] = data.get('cliente_id', veiculo.cliente_id)
+    data = request.json
+    # Corrected data.get usage
+    veiculo.cliente_id = data.get('cliente_id', veiculo.cliente_id)
     veiculo.marca = data.get('marca', veiculo.marca)
     veiculo.modelo = data.get('modelo', veiculo.modelo)
+    veiculo.placa = data.get('placa', veiculo.placa)
     veiculo.ano_fabricacao = data.get('ano_fabricacao', veiculo.ano_fabricacao)
     veiculo.save()
     return jsonify(veiculo.serialize())
 
 
-
-
-
-@app.route('/veiculos/<int:id>', methods=['DELETE'])
-def deletar_veiculo(id):
-
-    veiculo = Veiculo.query.get_or_404(id)
-    veiculo.delete()
-    return jsonify({'messagem': 'Veículo deletado com sucesso!'})
-
-
-
-
-
 @app.route('/ordens', methods=['GET'])
 def listar_ordens():
-
-    return jsonify([o.serialize() for o in OrdemServico.query.all()])
-
-
+    ordens = db_session.execute(select(OrdemServico)).scalars().all()
+    return jsonify([o.serialize() for o in ordens])
 
 
-
-@app.route('/ordens', methods=['GET'])
-def criar_ordens():
-
+@app.route('/ordens', methods=['POST'])
+def cria_ordens():
     data = request.get_json()
     ordens = OrdemServico(
         veiculo_id=data['veiculo_id'],
         data_abertura=data['data_abertura'],
         descricao_servico=data['descricao_servico'],
         status=data['status'],
-        valor_estimada=data['valor_estimado'],
+        valor_estimado=data['valor_estimado'],
     )
     ordens.save()
     return jsonify(ordens.serialize()), 201
 
 
-
-
-
-
 @app.route('/ordens/<int:id>', methods=['GET'])
-def buscar_ordens(id):
-
-    ordem = OrdemServico.query.get_or_404(id)
+def busca_ordens(id):
+    ordem = db_session.execute(select(OrdemServico).where(OrdemServico.id == id)).scalar_one_or_none()
+    if not ordem:
+        return jsonify({'message': 'Ordem de Serviço não encontrada'}), 404
     return jsonify(ordem.serialize())
 
 
-
-
-
 @app.route('/ordens/<int:id>', methods=['PUT'])
-def atualizar_ordens(id):
+def atualiza_ordens(id):
+    ordem = db_session.execute(select(OrdemServico).where(OrdemServico.id == id)).scalar_one_or_none()
+    if not ordem:
+        return jsonify({'message': 'Ordem de Serviço não encontrada'}), 404
 
-    ordem = OrdemServico.query.get_or_404(id)
-    data = request.json()
+    data = request.json
     ordem.veiculo_id = data.get('veiculo_id', ordem.veiculo_id)
     ordem.data_abertura = data.get('data_abertura', ordem.data_abertura)
     ordem.descricao_servico = data.get('descricao_servico', ordem.descricao_servico)
     ordem.status = data.get('status', ordem.status)
-    ordem.valor_estimada = data.get('valor_estimada', ordem.valor_estimada)
+    ordem.valor_estimado = data.get('valor_estimado', ordem.valor_estimado) # Corrected typo in variable name
     ordem.save()
     return jsonify(ordem.serialize())
-
-
-@app.route('/ordens/<int:id>', methods=['DELETE'])
-def deletar_ordens(id):
-
-    ordem = OrdemServico.query.get_or_404(id)
-    ordem.delete()
-    return jsonify({'menssagem': 'Ordem deletadasa com sucesso!'})
-
 
 if __name__ == '__main__':
     app.run(debug=True)

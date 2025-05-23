@@ -126,11 +126,6 @@ class OrdemServico(Base):
 
 
 
-    def delete(self):
-        db_session.delete(self)
-        db_session.commit()
-
-
 
     def serialize(self):
         return {
