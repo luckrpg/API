@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
-from models import Cliente, Veiculo, OrdemServico, clientes, veiculos, ordens_de_servico
+from models import Cliente, Veiculo, OrdemServico
+
 
 app = Flask(__name__)
 
@@ -98,4 +99,5 @@ def criar_ordem_servico():
 
 # Main
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5001)
+

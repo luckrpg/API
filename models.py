@@ -14,8 +14,9 @@ Session = scoped_session(SessionFactory)
 
 
 db = SQLAlchemy()
-db.engine = engine
+db.engin = engine
 db.session = Session()
+
 
 
 # Modelos
