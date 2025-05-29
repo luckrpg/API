@@ -37,7 +37,7 @@ def cria_cliente():
     return jsonify(cliente.serialize()), 201
 
 
-@app.route('/clientes/atualiza', methods=['PUT'])
+@app.route('/clientes/atualiza<id>', methods=['PUT'])
 def atualiza_cliente(id):
 
     cliente = db_session.execute(select(Cliente).where(Cliente.id == id)).scalar_one_or_none()
@@ -61,7 +61,7 @@ def listar_veiculos():
 
 
 
-@app.route('/veiculos', methods=['POST'])
+@app.route('/cria_veiculos', methods=['POST'])
 def cria_veiculo():
     data = request.json
     veiculo = Veiculo(
@@ -76,7 +76,7 @@ def cria_veiculo():
 
 
 
-@app.route('/veiculos/<int:id>', methods=['GET'])
+@app.route('/veiculos/busca<id>', methods=['GET'])
 def busca_veiculo(id):
     veiculo = db_session.execute(select(Veiculo).where(Veiculo.id == id)).scalar_one_or_none()
     if not veiculo:
@@ -84,7 +84,7 @@ def busca_veiculo(id):
     return jsonify(veiculo.serialize())
 
 
-@app.route('/veiculos/<int:id>', methods=['PUT'])
+@app.route('/veiculos/atualizar<id>', methods=['PUT'])
 def atualiza_veiculo(id):
     veiculo = db_session.execute(select(Veiculo).where(Veiculo.id == id)).scalar_one_or_none()
     if not veiculo:
@@ -121,7 +121,7 @@ def cria_ordens():
     return jsonify(ordens.serialize()), 201
 
 
-@app.route('/ordens/<int:id>', methods=['GET'])
+@app.route('/ordens/busca>', methods=['GET'])
 def busca_ordens(id):
     ordem = db_session.execute(select(OrdemServico).where(OrdemServico.id == id)).scalar_one_or_none()
     if not ordem:
@@ -129,7 +129,7 @@ def busca_ordens(id):
     return jsonify(ordem.serialize())
 
 
-@app.route('/ordens/<int:id>', methods=['PUT'])
+@app.route('/ordens/atualiza', methods=['PUT'])
 def atualiza_ordens(id):
     ordem = db_session.execute(select(OrdemServico).where(OrdemServico.id == id)).scalar_one_or_none()
     if not ordem:
@@ -145,4 +145,4 @@ def atualiza_ordens(id):
     return jsonify(ordem.serialize())
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5001)
